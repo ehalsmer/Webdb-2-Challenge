@@ -73,7 +73,7 @@ router.get('/:id', validateId, (req, res) => {
 router.post('/', validateCar, validateVin, (req, res)=>{
     db('cars').insert(req.body)
     .then(([id]) => {
-        db('cars').where({ id })
+        db('cars').where({ id }).first()
         .then(response => {
             res.status(200).json(response).end()
         })

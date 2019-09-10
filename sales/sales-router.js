@@ -69,8 +69,12 @@ router.get('/:id', validateId, (req, res) => {
 
 router.post('/', validateCarId, validateSale, (req, res)=>{
     db('sales').insert(req.body)
-    .then(response => {
-        res.status(201).json(response)
+    .then(([id]) => {
+        db('sales').where({ id }).first()
+        .then(response => {
+            res.status(200).json(response).end()
+        })
+        .catch(err => { res.json(err).end()})
     })
     .catch(err => {
         res.status(500).json(err)
@@ -78,11 +82,19 @@ router.post('/', validateCarId, validateSale, (req, res)=>{
 })
 
 router.delete('/:id', validateId, (req, res) => {
-
+    db('sales').where({id: req.params.id}).del()
+    .then(count => {
+        res.status(200).json({message: `Deleted ${count} sale(s) with id ${req.params.id}`})
+    })
+    .catch(error => {res.json(error)})
 })
 
 router.put('/:id', validateId, validateSale, (req, res)=>{
-
+    db('sales').where('id', `${req.params.id}`).update(req.body)
+    .then(count => {
+        res.status(200).json({message: `Updated ${count} sale(s)`})
+    })
+    .catch(err => { res.json(err)})
 })
 
 module.exports = router;
