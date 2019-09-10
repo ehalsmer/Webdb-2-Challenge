@@ -19,6 +19,7 @@ exports.up = function(knex) {
       tbl.string('dateOfSale').notNullable();
       tbl.string('seller').notNullable();
       tbl.string('buyer').notNullable();
+      tbl.integer('amount').notNullable();
       tbl.integer('car_id').unsigned().notNullable().references('id').inTable('cars')
   })
 };
