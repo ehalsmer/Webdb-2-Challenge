@@ -11,7 +11,7 @@ function validateId(req, res, next){
             req.data = response;
             next();
         } else {
-            res.status(404).json({message: 'No record found with that ID'})
+            res.status(404).json({message: 'No car found with that ID'})
         }
     })
     .catch(error => {
@@ -72,8 +72,6 @@ router.get('/:id', validateId, (req, res) => {
 
 router.post('/', validateCar, validateVin, (req, res)=>{
     db('cars').insert(req.body)
-    // .then(response => res.status(201).json(response))
-    // .catch(error => res.json(error))
     .then(([id]) => {
         db('cars').where({ id })
         .then(response => {
@@ -82,6 +80,22 @@ router.post('/', validateCar, validateVin, (req, res)=>{
         .catch(err => { res.json(err).end()})
     })
     .catch(err => { res.json(err).end()})
+})
+
+router.delete('/:id', validateId, (req, res) => {
+    db('cars').where({id: req.params.id}).del()
+    .then(count => {
+        res.status(200).json({message: `Deleted ${count} car(s) with id ${req.params.id}`})
+    })
+    .catch(err => { res.json(err)})
+})
+
+router.put('/:id', validateId, validateCar, validateVin, (req, res)=>{
+    db('cars').where('id', `${req.params.id}`).update(req.body)
+    .then(count => {
+        res.status(200).json({message: `Updated ${count} car(s)`})
+    })
+    .catch(err => { res.json(err)})
 })
 
 module.exports = router;
