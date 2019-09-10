@@ -1,6 +1,7 @@
 
 exports.up = function(knex) {
-  return knex.schema.createTable('cars', tbl => {
+  return knex.schema
+  .createTable('cars', tbl => {
       // critical info:
       //    VIN, make, model, mileage
       // also track:
@@ -13,8 +14,17 @@ exports.up = function(knex) {
       tbl.string('transmissionType');
       tbl.string('titleStatus');
   })
+  .createTable('sales', tbl => {
+      tbl.increments();
+      tbl.string('dateOfSale').notNullable();
+      tbl.string('seller').notNullable();
+      tbl.string('buyer').notNullable();
+      tbl.integer('car_id').unsigned().notNullable().references('id').inTable('cars')
+  })
 };
 
 exports.down = function(knex) {
-    return knex.schema.dropTableIfExists('cars');
+    return knex.schema
+      .dropTableIfExists('sales')
+      .dropTableIfExists('cars');
 };
