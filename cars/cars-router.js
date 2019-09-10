@@ -4,11 +4,84 @@ const db = require('../data/db-config');
 
 const router = express.Router();
 
+function validateId(req, res, next){
+    db.select('*').from('cars').where('id', `${req.params.id}`).first()
+    .then(response => {
+        if (response){
+            req.data = response;
+            next();
+        } else {
+            res.status(404).json({message: 'No record found with that ID'})
+        }
+    })
+    .catch(error => {
+        res.status(500).json({message: 'Error looking up ID'})
+    })
+}
+
+function validateCar(req, res, next){
+    const car = req.body;
+    if (!car.vin){
+        res.status(400).json({message: 'Car is missing required vin field'}).end();
+    }
+    else if (!car.make){
+        res.status(400).json({message: 'Car is missing required make field'}).end();
+    }
+    else if (!car.model){
+        res.status(400).json({message: 'Car is missing required make field'}).end();
+    }
+    else if (!car.mileage){
+        res.status(400).json({message: 'Car is missing required mileage field'}).end();
+    }
+    else if (car.vin.length > 17){
+        res.status(400).json({message: 'Vin cannot be more than 17 characters'}).end();
+    }
+    else if (typeof car.mileage != 'number'){
+        res.status(400).json({message: 'Mileage must be a number'}).end();
+    }
+    next();
+}
+
+function validateVin (req, res, next) {
+    db.select('*').from('cars').where('vin', `${req.body.vin}`).first()
+    .then(response => {
+        if (response){
+            res.status(400).json({message: 'A car with that vin already exists'}).end();
+        } else {
+            next()
+        }
+    })
+    .catch(error => {
+        res.status(500).json({message: 'Error checking vin'})
+    })
+}
+
 router.get('/', (req, res) => {
     db('cars')
     .then(response => {
         res.status(200).json(response)
     })
+    .catch(err => {
+        res.status(500).json({message: 'Error retrieving cars'})
+    })
+})
+
+router.get('/:id', validateId, (req, res) => {
+    res.status(200).json(req.data)
+})
+
+router.post('/', validateCar, validateVin, (req, res)=>{
+    db('cars').insert(req.body)
+    // .then(response => res.status(201).json(response))
+    // .catch(error => res.json(error))
+    .then(([id]) => {
+        db('cars').where({ id })
+        .then(response => {
+            res.status(200).json(response).end()
+        })
+        .catch(err => { res.json(err).end()})
+    })
+    .catch(err => { res.json(err).end()})
 })
 
 module.exports = router;
