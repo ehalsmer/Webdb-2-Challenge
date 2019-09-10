@@ -1,11 +1,14 @@
 const express = require('express');
 
-// import db-config
+const db = require('../data/db-config');
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.status(200).json({message: 'server up'})
+    db('cars')
+    .then(response => {
+        res.status(200).json(response)
+    })
 })
 
 module.exports = router;
