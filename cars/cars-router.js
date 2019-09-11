@@ -57,7 +57,11 @@ function validateVin (req, res, next) {
 }
 
 router.get('/', (req, res) => {
-    db('cars')
+    // example: http://localhost:5001/api/cars?sortby=mileage&sortdir=desc
+    const limit = req.query.limit || 100;
+    const sortBy = req.query.sortby || 'id'; // column to order rows by
+    const sortDir = req.query.sortdir || 'asc'; // direction to order (asc or desc)
+    db('cars').orderBy(`${sortBy}`, `${sortDir}`).limit(limit)
     .then(response => {
         res.status(200).json(response)
     })

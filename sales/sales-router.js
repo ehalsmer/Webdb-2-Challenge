@@ -5,7 +5,11 @@ const db = require('../data/db-config');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    db('sales')
+    // example: http://localhost:5001/api/sales?sortby=amount&sortdir=desc&limit=5 will return the top 5 sales in terms of amount the car sold for
+    const limit = req.query.limit || 100;
+    const sortBy = req.query.sortby || 'id'; // column to order rows by
+    const sortDir = req.query.sortdir || 'asc'; // direction to order (asc or desc)
+    db('sales').orderBy(`${sortBy}`, `${sortDir}`).limit(limit)
     .then(response => {
         res.status(200).json(response)
     })
